@@ -1,19 +1,14 @@
-import base64
 import traceback
 import streamlit as st
-import segno
 from pyzbar import pyzbar
 from PIL import Image
 
-def get_image_byts(qr_uri):
-    _, base64_data = qr_uri.split(';base64,')
-    img_byts = base64.b64decode(base64_data)
-    return img_byts
+from libs.create_qr import CreateQr
+from libs.helper import qr_types
+from libs.show_qr import ShowQr
 
+from segno import helpers as hp
 
-def create_qr_code(data):
-    qrcode = segno.make(data, micro=False)
-    return qrcode
 
 
 def read_qr_code(upload):
@@ -24,6 +19,7 @@ def read_qr_code(upload):
         for qr in qr_codes:
             data = qr.data.decode('utf-8')
             qr_data.append(data)
+        print(qr_data)
         return qr_data
     except Exception:
         traceback.print_exc()
@@ -39,17 +35,16 @@ def main():
     )
 
     if op == "Create QR":
-        qr_data = st.text_input('Please enter the data you want to encode')
-        if qr_data == "":
-            st.warning("Please enter data you want to encode in text box")
+        cqr = CreateQr()
+        qr_type = st.radio(label="Which Qr Code do you want to generate?", options= qr_types.keys(),horizontal=True, help="Choose the type of QR you want to generate")
+        qr_data_func = qr_types[qr_type]
+        qr_data = qr_data_func(cqr)
+        if not qr_data:
+            pass
         else:
             try:
-                qr = create_qr_code(qr_data)
-                st.header("Here is your qr code 🙂🙂🙂🙂")
-                qr_uri = qr.png_data_uri(scale=10)
-                st.image(qr_uri)
-                image_bytes = get_image_byts(qr_uri)
-                st.download_button(label='Download QR Code', data=image_bytes, file_name='qrcode.png', mime='image/png')
+                sqr = ShowQr(qrobj=qr_data)
+                sqr.display_qr(qr_type=qr_type)
             except Exception:
                 traceback.print_exc()
                 st.warning("Cannot generate Qr code now")
@@ -65,7 +60,7 @@ def main():
             if data:
                 st.subheader("QR Code Contents 😀😀😀")
                 for d in data:
-                    st.write(d)
+                    st.code(d)
             else:
                 st.info("QR code cannot be decoded....😥😥😥")
 
