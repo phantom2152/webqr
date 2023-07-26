@@ -4,10 +4,40 @@ from pyzbar import pyzbar
 from PIL import Image
 
 from libs.create_qr import CreateQr
-from libs.helper import qr_types
+from libs.helper import qr_types,get_sidebar
 from libs.show_qr import ShowQr
 
 from segno import helpers as hp
+import cv2
+
+
+def qr_cam():
+    camera_id = 0
+    delay = 1
+    window_name = 'OpenCV QR Code'
+
+    qcd = cv2.QRCodeDetector()
+    cap = cv2.VideoCapture(camera_id)
+
+    while True:
+        ret, frame = cap.read()
+
+        if ret:
+            ret_qr, decoded_info, points, _ = qcd.detectAndDecodeMulti(frame)
+            if ret_qr:
+                for s, p in zip(decoded_info, points):
+                    if s:
+                        print(s)
+                        color = (0, 255, 0)
+                    else:
+                        color = (0, 0, 255)
+                    frame = cv2.polylines(frame, [p.astype(int)], True, color, 8)
+            cv2.imshow(window_name, frame)
+
+        if cv2.waitKey(delay) & 0xFF == ord('q'):
+            break
+
+    cv2.destroyWindow(window_name)
 
 
 
@@ -28,6 +58,9 @@ def read_qr_code(upload):
 
 def main():
     st.title("WEB QR 🖥🖥")
+
+    options= get_sidebar()
+
     op = st.radio(
         "Select opeartion",
         ("Create QR", "Read QR"),
@@ -44,7 +77,7 @@ def main():
         else:
             try:
                 sqr = ShowQr(qrobj=qr_data)
-                sqr.display_qr(qr_type=qr_type)
+                sqr.display_qr(qr_type=qr_type,options = options)
             except Exception:
                 traceback.print_exc()
                 st.warning("Cannot generate Qr code now")
@@ -53,7 +86,7 @@ def main():
         if mode == "Upload":
             upload = st.file_uploader("upload", ["png", "jpeg"])
         else:
-            upload = st.camera_input("Take a picture")
+            upload = st.camera_input("Capture Image")
 
         if upload is not None:
             data = read_qr_code(upload)

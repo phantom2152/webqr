@@ -3,7 +3,8 @@ from segno import helpers as hp
 import segno
 import urllib
 import datetime
-
+from datetime import datetime as dt
+import textwrap
 
 class CreateQr:
 
@@ -34,7 +35,7 @@ class CreateQr:
             
             ssid = st.text_input("SSID", key="ssid", help="Enter the name of your Wi-Fi network (Service Set Identifier).")
             password = st.text_input("Password", key="password", help="Enter the password for your Wi-Fi network.")
-            security = st.selectbox("Security", ("None", "WEP", "WPA/WPA2"), index=2, key="security", help="Select the security type for your Wi-Fi network.").replace("None","nopass")
+            security = st.selectbox("Security", ("None", "WEP", "WPA"), index=2, key="security", help="Select the security type for your Wi-Fi network.").replace("None","nopass")
             hidden = st.checkbox("Hidden", key="hidden", help="Check this if your Wi-Fi network is hidden (not broadcasted).")
             submitted = st.form_submit_button("Submit")
 
@@ -122,9 +123,9 @@ class CreateQr:
     def vcard_qr(self):
         with st.form("vcard_qr_form"):
             st.info("Please fill in the details")
-            st.code("Not all fields are mandatory.")
+            st.code("‼️ Not all fields are mandatory.")
 
-            name = st.text_input("Name", key="name", help="Enter the name of the contact. If the name consists of first and last name separated by a semicolon (;), enter it accordingly.")
+            name = st.text_input("Name", key="name", help="Enter the name of the contact. Enter in lastname;firstname format. Please fill accordingly")
             displayname = st.text_input("Display Name", key="displayname", help="Enter the name to be displayed for the contact.")
             email = st.text_input("Email", key="email", help="Enter the email address of the contact. For multiple emails, separate them with commas.").split(",")
             phone = st.text_input("Phone", key="phone", help="Enter the phone number of the contact. For multiple phone numbers, separate them with commas.").split(",")
@@ -171,7 +172,63 @@ class CreateQr:
                     return qr
                 except ValueError:
                     st.error("Invalid input! Please enter valid decimal numbers for latitude and longitude.")
-                
+    
+    def whatsapp_qr(self):
+        with st.form("whatsapp_qr_form"):
+            st.info("Please fill in the details")
+            
+            number = st.text_input("Number", help="Enter the recipient's phone number in international format (e.g., +123456789).").lstrip("+")
+            message = st.text_area("Message", help="Enter the content of the Whatsapp message.")
+            encoded_message = urllib.parse.quote_plus(message)
+            submitted = st.form_submit_button("Submit")
+            
+            if submitted:
+                if not number == "":
+                    sms_config = f"https://wa.me/{number}?text={encoded_message}"
+                    qr = self._create_qr_code(sms_config)
+                    return qr
+                else:
+                    st.warning("Please enter Number")
+
+    def event_qr(self):
+        with st.form("event_qr_form"):
+            st.info("Please fill in the details")
+
+            title = st.text_input("Title", key="title", help="Enter the title of the event.")
+            std, stt = st.columns(2)
+            sdate = std.date_input("Enter Start date", key="start_date", help="Please use Format: YYYY/MM/DD")
+            stime = stt.text_input("Enter start time", key="start_time", help="Please use Format: HH:MM:SS", value="12:00:00")
+            # dtstart = sdate.replace("/","")+"T"+stime.replace(":","")+"00"
+            etd, ett = st.columns(2)
+            edate = etd.date_input("Enter End date", key="end_date", help="Please use Format: YYYY/MM/DD")
+            etime = ett.text_input("Enter End time", key="end_time", help="Please use Format: HH:MM:SS", value="12:00:00")
+            # dtend = edate.replace("/","")+"T"+etime.replace(":","")+"00"
+            organizer = st.text_input("Organizer", key="organizer", help="Enter the name of the event organizer.")
+            location = st.text_input("Location", key="location", help="Enter the location of the event.")
+            url = st.text_input("URL", key="url", help="Enter the URL related to the event.")
+            description = st.text_area("Description", key="description", help="Enter a description of the event.")
+
+            submitted = st.form_submit_button("Submit")
+
+            if submitted:
+                dtstart = dt.strptime(f"{sdate} {stime}", "%Y-%m-%d %H:%M:%S").strftime("%Y%m%dT%H%M%S")
+                dtend = dt.strptime(f"{edate} {etime}", "%Y-%m-%d %H:%M:%S").strftime("%Y%m%dT%H%M%S")
+                event_config = f"""
+                    BEGIN:VEVENT
+                    SUMMARY:{title}
+                    DTSTART:{dtstart}
+                    DTEND: {dtend}
+                    ORGANIZER:{organizer}
+                    LOCATION:{location}
+                    DESCRIPTION: {description}
+                    URL: {url}
+                    END:VEVENT
+                """
+                event_config = textwrap.dedent(event_config).strip()
+                qr = self._create_qr_code(event_config)
+                return qr
+
+            
 
 
     

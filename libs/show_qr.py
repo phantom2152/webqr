@@ -1,5 +1,6 @@
 import streamlit as st
 import base64
+from PIL import Image
 
 class ShowQr:
     def __init__(self, qrobj) -> None:
@@ -11,9 +12,9 @@ class ShowQr:
         return img_byts
 
 
-    def display_qr(self,qr_type):
-        qr_uri = self.qrobj.png_data_uri(scale=10)
-        _,img,_ = st.columns((1,3,1.2))
+    def display_qr(self,qr_type,options):
+        qr_uri = self.qrobj.png_data_uri(**options)
+        _,img,_ = st.columns((1.2,2,1.2))
         with img:
             st.header(f"Here is your {qr_type} QR")
             st.image(qr_uri)
