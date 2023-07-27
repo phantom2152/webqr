@@ -43,6 +43,11 @@ class ReadQr:
                 st.info("QR code cannot be decoded....😥😥😥")
 
     def decode_from_video(self):
+        """
+            Could not be accomplished when hosted on remote server since cv uses server side camera,
+            cannot use devices camera while running from server,
+            This function is only usefull when running this script in local machine
+        """
         cap = cv2.VideoCapture(0)
         frame_placeholder = st.empty()
         stop_button_pressed = st.button("Stop")
@@ -83,3 +88,25 @@ class ReadQr:
 
         cap.release()
         cv2.destroyAllWindows()
+
+
+    def decode_from_image(self):
+        upload = st.camera_input("Capture Qr code", help="Capture Image of a qr code")
+        if upload is not None:
+            image = Image.open(upload)
+            decoded_qr_codes = pyzbar.decode(image)
+
+            if decoded_qr_codes:
+                image_np = np.array(image)
+                st.subheader("QR Code Contents 😀😀😀")
+                img_place_holder = st.empty()
+                for i, qr_code in enumerate(decoded_qr_codes, start=1):
+
+                    image_np = self._get_boundry_box(np_image=image_np,qr_code=qr_code,index=i)
+
+                    st.code(f"{i} -> {qr_code.data.decode('utf-8')}")
+
+                image_with_boundary_boxes = Image.fromarray(image_np).convert("RGB")
+                img_place_holder.image(image_with_boundary_boxes)
+            else:
+                st.info("QR code cannot be decoded....😥😥😥")
