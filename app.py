@@ -22,7 +22,7 @@ def main():
         cqr = CreateQr()
         qr_type = st.radio(label="Which Qr Code do you want to generate?", options= qr_types.keys(),horizontal=True, help="Choose the type of QR you want to generate")
         qr_data_func = qr_types[qr_type]
-        st.caption("<-- Customize your QR code using the side bar")
+        st.caption("⬅️ Customize your QR code using the side bar")
         qr_data = qr_data_func(cqr)
         if not qr_data:
             pass
@@ -35,7 +35,7 @@ def main():
                 st.warning("Cannot generate Qr code now")
     else:
         mode = st.radio("Choose Mode", ("Upload", "Camera"), horizontal=True)
-        st.caption("Multiple QR codes in a Photo is also supported.")
+        st.caption("Multiple QR codes in a photo can also be detected")
         rqr = ReadQr()
         if mode == "Upload":
             rqr.decode_uploaded_qr()
