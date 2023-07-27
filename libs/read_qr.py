@@ -91,7 +91,7 @@ class ReadQr:
 
 
     def decode_from_image(self):
-        upload = st.camera_input("Capture Qr code", help="Capture Image of a qr code")
+        upload = st.camera_input("Capture Qr code", help="Capture Image of a qr code",key="camera ino")
         if upload is not None:
             image = Image.open(upload)
             decoded_qr_codes = pyzbar.decode(image)

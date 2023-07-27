@@ -38,7 +38,7 @@ def main():
         if mode == "Upload":
             rqr.decode_uploaded_qr()
         else:
-            rqr.decode_from_video()
+            rqr.decode_from_image()
 
 
 
