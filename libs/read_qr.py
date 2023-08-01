@@ -6,17 +6,28 @@ from pyzbar import pyzbar
 import time
 
 class ReadQr:
+
+    def _convert_to_rgb(self, image_np):
+        if image_np.shape[-1] == 4:  # Check if the image has an alpha channel
+            image_np = cv2.cvtColor(image_np, cv2.COLOR_BGRA2BGR)  # Convert from BGRA to BGR mode
+
+        return image_np
+    
+
     def _get_boundry_box(self,np_image,qr_code,index):
         qr_code_polygon = qr_code.polygon
 
-        # Draw a green boundary box around the detected QR code
-        pts = np.array(qr_code_polygon, np.int32)
-        pts = pts.reshape((-1, 1, 2))
-        cv2.polylines(np_image, [pts], True, (0, 255, 0), 2)
+        try:
+            # Draw a green boundary box around the detected QR code
+            pts = np.array(qr_code_polygon, np.int32)
+            pts = pts.reshape((-1, 1, 2))
+            cv2.polylines(np_image, [pts], True, (0, 255, 0), 2)
 
-        # Draw the index above the boundary box
-        x, y, _, _ = cv2.boundingRect(pts)
-        cv2.putText(np_image, str(index), (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+            # Draw the index above the boundary box
+            x, y, _, _ = cv2.boundingRect(pts)
+            cv2.putText(np_image, str(index), (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+        except Exception:
+            pass
 
         return np_image
         
@@ -29,6 +40,10 @@ class ReadQr:
 
             if decoded_qr_codes:
                 image_np = np.array(image)
+
+                # Convert the image to RGB mode without alpha channel
+                image_np = self._convert_to_rgb(image_np)
+                
                 st.subheader("QR Code Contents 😀😀😀")
                 img_place_holder = st.empty()
                 for i, qr_code in enumerate(decoded_qr_codes, start=1):

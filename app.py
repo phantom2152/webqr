@@ -7,6 +7,8 @@ from libs.show_qr import ShowQr
 from libs.read_qr import ReadQr
 
 
+st.set_page_config(page_title="WEB QR 🖥🖥")
+
 def main():
     st.title("WEB QR 🖥🖥")
 
