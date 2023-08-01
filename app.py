@@ -2,10 +2,11 @@ import traceback
 import streamlit as st
 
 from libs.create_qr import CreateQr
-from libs.helper import qr_types,get_sidebar
+from libs.helper import qr_types
 from libs.show_qr import ShowQr
 from libs.read_qr import ReadQr
-
+from libs.layout.sidebar import get_sidebar
+from libs.layout.footer import get_footer
 
 st.set_page_config(page_title="WEB QR 🖥🖥")
 
@@ -44,7 +45,10 @@ def main():
         else:
             rqr.decode_from_image()
 
+    
+
 
 
 if __name__ == "__main__":
     main()
+    get_footer()
